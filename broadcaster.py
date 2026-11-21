@@ -1,6 +1,7 @@
 import json
 import os
 import time
+import scorer
 from datetime import datetime
 def write(data,name):
     tmp=name+'.tmp'
@@ -12,7 +13,7 @@ def run(name):
     while 1:
         data={
             "timestamp": datetime.now().isoformat(timespec="seconds"),
-            "score": 50,
+            "score": scorer.get_score(),
             "status": "ok",
         }
         write(data,name)
