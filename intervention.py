@@ -1,27 +1,21 @@
 import ctypes
 from threading import Thread as thread
-from time import monotonic as clock
 
 
 class breakPopup:
     def __init__(self):
-        self.lastShown = None
+        self.shown = False
         self.dialog = None
 
     def update(self, fatigueScore: float, resting: bool = False) -> bool:
         if resting:
-            self.lastShown = None
+            self.shown = False
             return False
 
-        now = clock()
-        if self.lastShown is None:
-            if fatigueScore <= 60:
-                return False
-        elif now - self.lastShown < 600:
+        if self.shown or fatigueScore <= 60:
             return False
 
         if self.dialog is not None and self.dialog.is_alive():
-            self.lastShown = now
             return False
 
         self.dialog = thread(
@@ -34,5 +28,5 @@ class breakPopup:
             daemon=True,
         )
         self.dialog.start()
-        self.lastShown = now
+        self.shown = True
         return True
