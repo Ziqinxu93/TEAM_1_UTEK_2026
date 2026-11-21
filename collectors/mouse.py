@@ -150,7 +150,7 @@ class MouseCollector:
             self.last_activity = now
             if self._current is not None and now - self._last_move_t > SEGMENT_GAP:
                 self._close_segment()
-            self._last_move_t = no  w
+            self._last_move_t = now
             if self._current is None:
                 self._current = _Segment(now, x, y)
                 self._last_sample_t = now

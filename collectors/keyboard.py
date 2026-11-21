@@ -12,7 +12,7 @@ def keyid(key):
     if isinstance(key,keyboard.Key):
         key=key.value
     return getattr(key,"vk",None) or key
-class KeyboardCollector:
+class Keyboard:
     def __init__(self):
         self.lock=threading.Lock()
         self.presses=deque()
@@ -41,7 +41,7 @@ class KeyboardCollector:
             t=self.down.pop(keyid(key),None)
             if t and now-t<=maxhold:
                 self.holds.append((now,now-t))
-    def get_features(self):
+    def features(self):
         now=time.perf_counter()
         old=now-window
         with self.lock:
@@ -75,8 +75,8 @@ class KeyboardCollector:
             f["hold"]=statistics.fmean(holds) if holds else None
         return f
 if __name__=="__main__":
-    c=KeyboardCollector()
+    c=Keyboard()
     c.start()
     while 1:
         time.sleep(5)
-        f=c.get_features()
+        f=c.features()
