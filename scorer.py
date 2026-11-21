@@ -56,8 +56,8 @@ class fatigueScorer:
     def update(self, now, screen, lastActivity, keyboard, mouse, activity=None):
         lastTime = self.lastTime
         gap = now - lastTime if lastTime is not None else 0
-        idle = activity is not None and activity["is_idle"]
-        onBreak = activity is not None and activity["on_break"]
+        idle = activity is not None and activity["idle"]
+        onBreak = activity is not None and activity["rest"]
         if lastTime is None or gap > 15:
             self.screenOnSince = now if screen == "on" else None
         elif screen != self.lastScreen:
@@ -65,7 +65,7 @@ class fatigueScorer:
         elif screen == "off" or onBreak:
             self.workSeconds = max(0, self.workSeconds - 4 * gap)
         elif activity is not None and not idle:
-            self.workSeconds += min(gap, activity["session_seconds"])
+            self.workSeconds += min(gap, activity["session"])
         elif screen == "on" and activity is None and lastActivity is not None and lastActivity >= self.screenOnSince:
             creditUntil = min(now, lastActivity + 60)
             self.workSeconds += max(0, creditUntil - lastTime)
@@ -78,14 +78,14 @@ class fatigueScorer:
 
 
 def liveReader():
-    from collectors.keyboard import KeyboardCollector
+    from collectors.keyboard import Keyboard
     from collectors.mouse import MouseCollector
     from collectors.screen import screenCollector
 
     baseFile = Path(__file__).with_name("baseline.json")
     baseline = json.loads(baseFile.read_text(encoding="utf-8")) if baseFile.is_file() else {}
     scorer = fatigueScorer(baseline)
-    keyboard, mouse, screen = KeyboardCollector(), MouseCollector(), screenCollector()
+    keyboard, mouse, screen = Keyboard(), MouseCollector(), screenCollector()
     screen.start()
     keyboard.start()
     mouse.start()
@@ -94,7 +94,7 @@ def liveReader():
         screenState = screen.getFeatures()
         now = clock()
         keyboardAt, mouseAt = keyboard.last_activity, mouse.last_activity
-        keys = keyboard.get_features() if now - keyboardAt <= 30 else {}
+        keys = keyboard.features() if now - keyboardAt <= 30 else {}
         pointer = mouse.get_features() if now - mouseAt <= 30 else {}
         return scorer.update(now, screenState, max(keyboardAt, mouseAt), keys, pointer, activity)
 
