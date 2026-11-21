@@ -12,7 +12,7 @@ powerCallback = ct.WINFUNCTYPE(
 
 
 class powerSubscription(ct.Structure):
-    __field__ = [("callback", powerCallback), ("context", ct.c_void_p)]
+    _fields_ = [("callback", powerCallback), ("context", ct.c_void_p)]
 
 
 class screenCollector:
